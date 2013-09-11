@@ -91,7 +91,7 @@ def indent(elem, level=0):
 def get_default_revision():
     m = ElementTree.parse(".repo/manifests/default.xml")
     d = m.findall('default')[0]
-    r = d.get('branch')
+    r = d.get('revision')
     return r.split('/')[-1]
 
 def get_from_manifest(devicename):
