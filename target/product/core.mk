@@ -29,6 +29,7 @@ PRODUCT_PACKAGES += \
     KeyChain \
     PicoTts \
     SharedStorageBackup \
+    OctBeam \
     TelephonyProvider \
     UserDictionaryProvider \
     VpnDialogs \
