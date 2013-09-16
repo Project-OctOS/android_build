@@ -72,21 +72,23 @@ PRODUCT_PACKAGES += \
     requestsync \
     telephony-common \
     voip-common
-
+ 
 # host-only dependencies
 ifeq ($(WITH_HOST_DALVIK),true)
-    PRODUCT_PACKAGES += \
-        apache-xml-hostdex \
-        bouncycastle-hostdex \
-        core-hostdex \
-        libcrypto \
-        libexpat \
-        libicui18n \
-        libicuuc \
-        libjavacore \
-        libssl \
-        libz-host \
-        dalvik
+
+PRODUCT_PACKAGES += \
+    apache-xml-hostdex \
+    bouncycastle-hostdex \
+    core-hostdex \
+    libcrypto \
+    libexpat \
+    libicui18n \
+    libicuuc \
+    libjavacore \
+    libssl \
+    libz-host \
+    dalvik
+
 endif
 
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_minimal.mk)
