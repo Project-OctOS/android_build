@@ -20,10 +20,10 @@
 # core_minimal.mk instead.
 
 PRODUCT_PACKAGES += \
-    BasicDreams \
-    Browser \
-    Contacts \
-    ContactsProvider \
+#    BasicDreams \
+#    Browser \
+#    Contacts \
+#    ContactsProvider \
     DefaultContainerService \
     Home \
     KeyChain \
