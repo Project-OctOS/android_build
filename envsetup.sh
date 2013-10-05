@@ -16,9 +16,9 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - jgrep:   Greps on all local Java files.
 - resgrep: Greps on all local res/*.xml files.
 - godir:   Go to the directory containing a file.
-- cmremote: Add git remote for CM Gerrit Review.
-- cmgerrit: A Git wrapper that fetches/pushes patch from/to CM Gerrit Review.
-- cmrebase: Rebase a Gerrit change and push it again.
+- octremote: Add git remote for OCT Gerrit Review.
+- octgerrit: A Git wrapper that fetches/pushes patch from/to OCT Gerrit Review.
+- octrebase: Rebase a Gerrit change and push it again.
 - aospremote: Add git remote for matching AOSP repository.
 - mka:      Builds using SCHED_BATCH on all processors.
 - mkap:     Builds the module(s) using mka and pushes them to the device.
@@ -1382,9 +1382,9 @@ function godir () {
     \cd $T/$pathname
 }
 
-function cmremote()
+function octremote()
 {
-    git remote rm cmremote 2> /dev/null
+    git remote rm octremote 2> /dev/null
     if [ ! -d .git ]
     then
         echo .git directory not found. Please run this from the root directory of the Android repository you wish to set up.
@@ -1399,16 +1399,16 @@ function cmremote()
           return 0
         fi
     fi
-    CMUSER=`git config --get review.review.cyanogenmod.org.username`
-    if [ -z "$CMUSER" ]
+    OCTUSER=`git config --get review.devbox.grommish.org.username`
+    if [ -z "$OCTUSER" ]
     then
-        git remote add cmremote ssh://review.cyanogenmod.org:29418/$GERRIT_REMOTE
+        git remote add octremote ssh://devbox.grommish.org:8443/$GERRIT_REMOTE
     else
-        git remote add cmremote ssh://$CMUSER@review.cyanogenmod.org:29418/$GERRIT_REMOTE
+        git remote add octremote ssh://$OCTUSER@devbox.grommish.org:8443/$GERRIT_REMOTE
     fi
-    echo You can now push to "cmremote".
+    echo You can now push to "octremote".
 }
-export -f cmremote
+export -f octremote
 
 function aospremote()
 {
@@ -1529,8 +1529,8 @@ function makerecipe() {
   if [ "$REPO_REMOTE" == "github" ]
   then
     pwd
-    cmremote
-    git push cmremote HEAD:refs/heads/'$1'
+    octremote
+    git push octremote HEAD:refs/heads/'$1'
   fi
   '
 
@@ -1539,12 +1539,12 @@ function makerecipe() {
   cd ..
 }
 
-function cmgerrit() {
+function octgerrit() {
     if [ $# -eq 0 ]; then
         $FUNCNAME help
         return 1
     fi
-    local user=`git config --get review.review.cyanogenmod.org.username`
+    local user=`git config --get review.devbox.grommish.org.username`
     local review=`git config --get remote.github.review`
     local project=`git config --get remote.github.projectname`
     local command=$1
@@ -1578,9 +1578,9 @@ EOF
                 return
             fi
             case $1 in
-                __cmg_*) echo "For internal use only." ;;
+                __octg_*) echo "For internal use only." ;;
                 changes|for)
-                    if [ "$FUNCNAME" = "cmgerrit" ]; then
+                    if [ "$FUNCNAME" = "octgerrit" ]; then
                         echo "'$FUNCNAME $1' is deprecated."
                     fi
                     ;;
@@ -1611,7 +1611,7 @@ HEAD will be pushed from local if omitted.
 EOF
                     ;;
                 *)
-                    $FUNCNAME __cmg_err_not_supported $1 && return
+                    $FUNCNAME __octg_err_not_supported $1 && return
                     cat <<EOF
 usage: $FUNCNAME $1 [OPTIONS] CHANGE-ID[/PATCH-SET][{@|^|~|:}ARG] [-- ARGS]
 
@@ -1623,8 +1623,8 @@ EOF
                     ;;
             esac
             ;;
-        __cmg_get_ref)
-            $FUNCNAME __cmg_err_no_arg $command $# && return 1
+        __octg_get_ref)
+            $FUNCNAME __octg_err_no_arg $command $# && return 1
             local change_id patchset_id hash
             case $1 in
                 */*)
@@ -1643,16 +1643,16 @@ EOF
             echo "refs/changes/$hash/$change_id/$patchset_id"
             ;;
         fetch|pull)
-            $FUNCNAME __cmg_err_no_arg $command $# help && return 1
-            $FUNCNAME __cmg_err_not_repo && return 1
+            $FUNCNAME __octg_err_no_arg $command $# help && return 1
+            $FUNCNAME __octg_err_not_repo && return 1
             local change=$1
             shift
             git $command $@ http://$review/p/$project \
-                $($FUNCNAME __cmg_get_ref $change) || return 1
+                $($FUNCNAME __octg_get_ref $change) || return 1
             ;;
         push)
-            $FUNCNAME __cmg_err_no_arg $command $# help && return 1
-            $FUNCNAME __cmg_err_not_repo && return 1
+            $FUNCNAME __octg_err_no_arg $command $# help && return 1
+            $FUNCNAME __octg_err_not_repo && return 1
             if [ -z "$user" ]; then
                 echo >&2 "Gerrit username not found."
                 return 1
@@ -1673,11 +1673,11 @@ EOF
                 $local_branch:refs/for/$remote_branch || return 1
             ;;
         changes|for)
-            if [ "$FUNCNAME" = "cmgerrit" ]; then
+            if [ "$FUNCNAME" = "octgerrit" ]; then
                 echo >&2 "'$FUNCNAME $command' is deprecated."
             fi
             ;;
-        __cmg_err_no_arg)
+        __octg_err_no_arg)
             if [ $# -lt 2 ]; then
                 echo >&2 "'$FUNCNAME $command' missing argument."
             elif [ $2 -eq 0 ]; then
@@ -1690,15 +1690,15 @@ EOF
                 return 1
             fi
             ;;
-        __cmg_err_not_repo)
+        __octg_err_not_repo)
             if [ -z "$review" -o -z "$project" ]; then
                 echo >&2 "Not currently in any reviewable repository."
             else
                 return 1
             fi
             ;;
-        __cmg_err_not_supported)
-            $FUNCNAME __cmg_err_no_arg $command $# && return
+        __octg_err_not_supported)
+            $FUNCNAME __octg_err_no_arg $command $# && return
             case $1 in
                 #TODO: filter more git commands that don't use refname
                 init|add|rm|mv|status|clone|remote|bisect|config|stash)
@@ -1709,9 +1709,9 @@ EOF
             ;;
     #TODO: other special cases?
         *)
-            $FUNCNAME __cmg_err_not_supported $command && return 1
-            $FUNCNAME __cmg_err_no_arg $command $# help && return 1
-            $FUNCNAME __cmg_err_not_repo && return 1
+            $FUNCNAME __octg_err_not_supported $command && return 1
+            $FUNCNAME __octg_err_no_arg $command $# help && return 1
+            $FUNCNAME __octg_err_not_repo && return 1
             local args="$@"
             local change pre_args refs_arg post_args
             case "$args" in
@@ -1772,15 +1772,15 @@ EOF
     esac
 }
 
-function cmrebase() {
+function octrebase() {
     local repo=$1
     local refs=$2
     local pwd="$(pwd)"
     local dir="$(gettop)/$repo"
 
     if [ -z $repo ] || [ -z $refs ]; then
-        echo "CyanogenMod Gerrit Rebase Usage: "
-        echo "      cmrebase <path to project> <patch IDs on Gerrit>"
+        echo "OctOS Gerrit Rebase Usage: "
+        echo "      octrebase <path to project> <patch IDs on Gerrit>"
         echo "      The patch IDs appear on the Gerrit commands that are offered."
         echo "      They consist on a series of numbers and slashes, after the text"
         echo "      refs/changes. For example, the ID in the following command is 26/8126/2"
@@ -1801,7 +1801,7 @@ function cmrebase() {
     echo "Bringing it up to date..."
     repo sync .
     echo "Fetching change..."
-    git fetch "http://review.cyanogenmod.org/p/$repo" "refs/changes/$refs" && git cherry-pick FETCH_HEAD
+    git fetch "https://devbox.grommish.org/p/$repo" "refs/changes/$refs" && git cherry-pick FETCH_HEAD
     if [ "$?" != "0" ]; then
         echo "Error cherry-picking. Not uploading!"
         return
