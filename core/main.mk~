@@ -43,7 +43,11 @@ ifeq (,$(findstring CYGWIN,$(shell uname -sm)))
 ifneq (1,$(strip $(shell expr $(MAKE_VERSION) \>= 3.81)))
 $(warning ********************************************************************************)
 $(warning *  You are using version $(MAKE_VERSION) of make.)
+<<<<<<< HEAD
+$(warning *  Android is tested to build with versions 3.81 and 3.82.)
+=======
 $(warning *  Android can only be built by versions 3.81 and higher.)
+>>>>>>> 2b53726... core: support make 4.00
 $(warning *  see https://source.android.com/source/download.html)
 $(warning ********************************************************************************)
 endif
@@ -337,7 +341,7 @@ ifeq (true,$(strip $(enable_target_debugging)))
   INCLUDE_TEST_OTA_KEYS := true
 else # !enable_target_debugging
   # Target is less debuggable and adbd is off by default
-  ADDITIONAL_DEFAULT_PROPERTIES += ro.debuggable=1
+  ADDITIONAL_DEFAULT_PROPERTIES += ro.debuggable=0
 endif # !enable_target_debugging
 
 ## eng ##
@@ -550,9 +554,19 @@ $(foreach m,$(ALL_MODULES), \
   $(eval r := $(ALL_MODULES.$(m).REQUIRED)) \
   $(if $(r), \
     $(eval r := $(call module-installed-files,$(r))) \
-    $(eval $(call add-required-deps,$(ALL_MODULES.$(m).INSTALLED),$(r))) \
+    $(eval t_m := $(filter $(TARGET_OUT_ROOT)/%, $(ALL_MODULES.$(m).INSTALLED))) \
+    $(eval h_m := $(filter $(HOST_OUT_ROOT)/%, $(ALL_MODULES.$(m).INSTALLED))) \
+    $(eval t_r := $(filter $(TARGET_OUT_ROOT)/%, $(r))) \
+    $(eval h_r := $(filter $(HOST_OUT_ROOT)/%, $(r))) \
+    $(if $(t_m), $(eval $(call add-required-deps, $(t_m),$(t_r)))) \
+    $(if $(h_m), $(eval $(call add-required-deps, $(h_m),$(h_r)))) \
    ) \
  )
+
+t_m :=
+h_m :=
+t_r :=
+h_r :=
 
 # Resolve the dependencies on shared libraries.
 $(foreach m,$(TARGET_DEPENDENCIES_ON_SHARED_LIBRARIES), \
