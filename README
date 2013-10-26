@@ -1,0 +1,1 @@
+If switching git source remote the tools/roomservice.py must be altered to pull from correct git remote.

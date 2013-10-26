@@ -34,7 +34,7 @@ except:
     device = product
 
 if not depsonly:
-    print "Device %s not found. Attempting to retrieve device repository from Team-OctOS Github (http://github.com/Team-OctOS)." % device
+    print "Device %s not found. Attempting to retrieve device repository from Project-OctOS Github (http://github.com/Project-OctOS)." % device
 
 repositories = []
 
@@ -54,7 +54,7 @@ def add_auth(githubreq):
 
 page = 1
 while not depsonly:
-    githubreq = urllib2.Request("https://api.github.com/users/Team-OctOS/repos?per_page=100&page=%d" % page)
+    githubreq = urllib2.Request("https://api.github.com/users/Project-OctOS/repos?per_page=100&page=%d" % page)
     add_auth(githubreq)
     result = json.loads(urllib2.urlopen(githubreq).read())
     if len(result) == 0:
@@ -144,7 +144,7 @@ def add_to_manifest(repositories, fallback_branch = None):
         if 'project' in repository:
             repo_project = repository['project']
         else:
-            repo_project = 'Team-OctOS'
+            repo_project = 'Project-OctOS'
         if exists_in_tree(lm, repo_name):
             print '%s/%s already exists' % (repo_project, repo_name)
             continue
@@ -182,7 +182,7 @@ def fetch_dependencies(repo_path, fallback_branch = None):
         fetch_list = []
 
         for dependency in dependencies:
-            if not is_in_manifest("Team-OctOS/%s" % dependency['repository']):
+            if not is_in_manifest("Project-OctOS/%s" % dependency['repository']):
                 fetch_list.append(dependency)
                 syncable_repos.append(dependency['target_path'])
 
@@ -232,7 +232,7 @@ else:
                 result = json.loads(urllib2.urlopen(githubreq).read())
             
             repo_path = "device/%s/%s" % (manufacturer, device)
-            adding = {'project':'Team-OctOS', 'repository':repo_name, 'target_path':repo_path}
+            adding = {'project':'Project-OctOS', 'repository':repo_name, 'target_path':repo_path}
             
             fallback_branch = None
             if not has_branch(result, default_revision):
@@ -262,4 +262,4 @@ else:
             print "Done"
             sys.exit()
 
-print "Repository for %s not found in the Team-OctOS Github repository list. If this is in error, you may need to manually add it to your local_manifest.xml." % device
+print "Repository for %s not found in the Project-OctOS Github repository list. If this is in error, you may need to manually add it to your local_manifest.xml." % device
